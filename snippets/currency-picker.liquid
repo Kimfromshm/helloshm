@@ -1,0 +1,18 @@
+{% assign supported_codes = settings.supported_currencies | split: ' ' %}
+{% if template != 'customers' %}
+{% if supported_codes.size > 2 %}
+<label class="currency-picker__wrapper">
+  <!-- <span class="currency-picker__label">Pick a currency</span> -->
+  <select class="currency-picker" name="currencies" style="display: inline; width: auto; vertical-align: inherit;">
+  <option value="{{ shop.currency }}" selected="selected">{{ shop.currency }}</option>
+  {% for code in supported_codes %}
+    {% if code != shop.currency and code != ''%}
+    <option value="{{ code }}">{{ code }}</option>
+    {% endif %}
+  {% endfor %}
+  </select>
+</label>
+{% endif %}
+{% endif %}
+
+

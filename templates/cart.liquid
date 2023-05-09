@@ -1,0 +1,607 @@
+{% comment %}
+
+  This is your /cart template.
+
+{% endcomment %}
+
+{{ 'css/vouchers.css?v1.1' | global_asset_url | stylesheet_tag }}
+{{ 'js/promotion/vouchers.js?v1.1' | global_asset_url | script_tag }}
+
+<style>
+  .cart-drawer.is-active{
+    padding: 20px;
+  }
+  /* Chrome, Safari, Edge, Opera */
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  /* Firefox */
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+  .cart-drawer.is-active .cart-drawer-wrapper .CartDrawerTrigger.icon-x{
+    display: none;
+  }
+  .order-item-wrapper, .cart-qty-adjust{
+    display: flex;
+  }
+  .cart__remove .svg-icon, .remove_voucher_btn .svg-icon {
+      width: 1em;
+      height: 1em;
+      cursor: pointer;
+  }
+  .svg-icon {
+    width: 1.2em;
+    height: 1.4em;
+    vertical-align: middle;
+    fill: currentColor;
+  }
+  .cart__image {
+    position: relative;
+    width: 70px;
+    height: 70px;
+    display: inline-block;
+    max-width: 100%;
+  }
+  .cart-qty-adjust .btn{
+    height: 25px;
+    min-width: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0px;
+    font-weight: 400;
+  }
+  .cart-qty-adjust input{
+    border-radius: 0px;
+    margin: 0;
+    padding: 0 8px;
+    height: 25px;
+    width: 50px;
+    text-align: center;
+    font-weight: 700;
+  }
+  .cart__image img{
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    z-index: 2;
+  }
+  .cart-sticky-button {
+    text-align: right;
+  }
+  .promotion__code-input:after {
+    content: '';
+    display: block;
+    clear: both;
+  }
+  .promotion__code-input .input-group {
+    max-width: 350px;
+    float: right;
+  }
+  .order-item-img{
+    margin-right: 10px;
+  }
+  @media screen and (max-width: 991px) {
+    .cart-drawer.is-active{
+      padding: 0 !important;
+    }
+    .cart-sticky-button-wrapper{
+      padding: 0 0 20px !important;
+    }
+    .cart-sticky-button-wrapper .btn{
+      margin-top: 20px;
+    }
+  }
+
+  /* Toast */
+  #toast {
+    display: none;
+    visibility: hidden;
+    max-width: 95%;
+    min-width: 250px;
+    padding: 15px 20px;
+    font-size: 16px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 2px;
+    position: fixed;
+    z-index: 1;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    transform: translateX(-50%);
+    bottom: 30px;
+    z-index: -10000;
+  }
+
+  #toast.show {
+    display: block;
+    visibility: visible;
+    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    z-index: 2147483647;
+  }
+
+  /* Animations to fade the Toast in and out */
+  @-webkit-keyframes fadein {
+    from {bottom: 0; opacity: 0;} 
+    to {bottom: 30px; opacity: 1;}
+  }
+
+  @keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+  }
+
+  @-webkit-keyframes fadeout {
+    from {bottom: 30px; opacity: 1;} 
+    to {bottom: 0; opacity: 0;}
+  }
+
+  @keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
+  }
+
+  .is-loading{
+    position: relative;
+  }
+  .is-loading:before{
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.1);
+    z-index: 98;
+  }
+  .is-loading:after{
+    content: '';
+    display: block;
+    width: 44px;
+    height: 44px;
+    position: absolute;
+    z-index: 99;
+    left: 50%;
+    top: 50%;
+    margin-left: -22px;
+    margin-top: -22px;
+    border-radius: 50%;
+    border: 5px solid #fff;
+    border-top-color: #666;
+    -webkit-animation: loading-spin .55s infinite linear;
+    -moz-animation: loading-spin .55s infinite linear;
+    -o-animation: loading-spin .55s infinite linear;
+    animation: loading-spin .55s infinite linear;
+  }
+
+  @-webkit-keyframes loading-spin {
+      0% { 
+          -webkit-transform: rotate(0deg);
+          -moz-transform: rotate(0deg);
+          -ms-transform: rotate(0deg);
+          -o-transform: rotate(0deg);
+          transform: rotate(0deg); 
+      }
+      100% { 
+          -webkit-transform: rotate(360deg);
+          -moz-transform: rotate(360deg);
+          -ms-transform: rotate(360deg);
+          -o-transform: rotate(360deg);
+          transform: rotate(360deg); 
+      }
+  }
+  @keyframes loading-spin {
+      0% { 
+          -webkit-transform: rotate(0deg);
+          -moz-transform: rotate(0deg);
+          -ms-transform: rotate(0deg);
+          -o-transform: rotate(0deg);
+          transform: rotate(0deg); 
+      }
+      100% { 
+          -webkit-transform: rotate(360deg);
+          -moz-transform: rotate(360deg);
+          -ms-transform: rotate(360deg);
+          -o-transform: rotate(360deg);
+          transform: rotate(360deg); 
+      }
+  }
+</style>
+
+{% if cart.item_count > 0 %}
+
+    <div class="cart-drawer is-active">
+      {% app_snippet 'cart/content_top' %}
+
+      <div id="CartTemplate" class="cart-drawer-wrapper">
+        {% include "cart-template" %}
+      </div>
+      
+      {% app_snippet 'cart/content_bottom' %}
+    </div>
+
+
+
+    {% if shop.plan_id == "0" or shop.plan_id == "5" or shop.plan_id == "6" %}
+      {% if shop.express_enabled %}
+        {% comment %}
+          Express checkout dialog 
+        {% endcomment %}
+        <div id="express-checkout-dialog" class="modal__dialog">
+          <div class="modal__dialog-bg dialog__close-toggle"></div>
+          <div class="modal__dialog-wrapper small__dialog">
+            <span class="dialog__close dialog__close-toggle">×</span>
+            <div class="modal__dialog-content">
+              <div class="modal__dialog-express-checkout">
+                <div>
+                  <button type="submit" name="expresscheckout" class="btn btn--full checkout">{{ 'cart.general.express_checkout' | t }}</button>
+                </div>
+                <div>
+                  {{ 'cart.general.or' | t }}
+                </div>
+                <div class="text-center">
+                  <button type="submit" name="checkout" value="true" class="btn btn--full btn--tertiary checkout">{{ 'cart.general.standard_checkout' | t }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <script type="text/javascript">
+          $( "#express-checkout-btn" ).click(function() {
+              var scrollbarWidth = window.innerWidth - document.body.clientWidth;
+              $('#express-checkout-dialog').addClass('show');
+              $('html').css({'overflow': 'hidden','margin-right': scrollbarWidth});
+            }
+          );
+          $( ".dialog__close-toggle" ).click(function() {
+              $('#express-checkout-dialog').removeClass('show');
+              $('html').css({'overflow': '','margin-right': ''});
+            });
+          $( "button.btn.checkout" ).click(function() {
+                $(this).addClass("btn--loading");
+              }
+            );
+        </script>
+      {% endif %}
+    {% endif %}
+
+  <div id="toast"><div id="toastContent"></div></div>
+  <style>
+    .cart-drawer .cart-drawer-content .cart-sticky-button-wrapper a.btn.CartDrawerTrigger{margin-bottom: 10px !important;}
+    #toastContent a{color: #fff;text-decoration: underline;margin-top: 10px;display: block;}
+    #toastContent .svg-icon{margin-right: 8px;margin-top: -1px;}
+  </style>
+  
+  <script type="text/javascript">
+    $('body').on("submit", "#CartForm", function() {
+      $(this).find('[type=submit]').addClass('btn--loading');
+    });
+    
+    $( "select.currency-picker" ).change(function(){
+      $("select.currency-picker").val($(this).val());
+      url=window.location.href;
+      newParam="currency=" + $( "select.currency-picker" ).val();
+      if(url.indexOf("currency=")===-1){
+        separator = (url.indexOf("?")===-1)?"?":"&";
+        newUrl= url + separator + newParam;
+      }else{
+        var url_currency = url.match(/(?:currency=)([^&]+)/);
+        oldParam="currency=" + url_currency[1];
+        newUrl=url.replace(oldParam,newParam); 
+      }
+      $("input[name=current_currency]").val($( "select.currency-picker" ).val());
+      window.location.href =newUrl;
+    });
+  
+    $("body").on("click", ".cart__remove", function() {
+      $('#CartTemplate').addClass('is-loading');
+      $.ajax({
+        type: 'POST',
+        url: '/cart/remove_item_quantity',
+        data: {
+          variant_id: $(this).data( "variant-id"),
+          item_id: $(this).data( "item-id"),
+          quantity: $(this).data( "quantity"),
+          i_id: $(this).data("i_id"),
+        },
+        dataType: 'json',
+        success: function(response){
+  
+          theme.cartDrawer(response);
+          $('#CartTemplate').removeClass('is-loading');
+        },
+        error: function(xhr){
+          console.log('error',xhr);
+          $('#CartTemplate').removeClass('is-loading');
+        }
+      });
+  
+    });
+  
+  
+    $('body').on("click", "#applycode",function() {
+      
+      if($("input[name='voucher_code']").val() != '') {
+  
+        $('#CartTemplate').addClass('is-loading');
+  
+        $.ajax({
+          type: 'POST',
+          url: '/new_cart/voucher',
+          data: {
+            voucher_code: $("input[name='voucher_code']").val(),
+            category: 'create'
+          },
+          dataType: 'json',
+          success: function(response){
+  
+            // console.log(response);
+  
+            if(response.error != undefined){
+              
+              if(response.error.message != undefined) popToast(response.error.message); 
+            
+              $("input[name='voucher_code']").val('')
+            
+            } 
+            
+            if(response.cart_content != undefined) theme.cartDrawer(response); 
+
+            $('#CartTemplate').removeClass('is-loading');
+          },
+          error: function(xhr){
+            console.log('error',xhr);
+            $('#CartTemplate').removeClass('is-loading');
+          }
+        });
+  
+      }
+  
+    });
+  
+  
+    $("body").on("click", ".remove_voucher_btn", function() {
+          $('#CartTemplate').addClass('is-loading');
+          $.ajax({
+            type: 'DELETE',
+            url: '/new_cart/voucher',
+            data: {
+              category: 'remove',
+              order_discount_id: $(this).data( "discount-id")
+            },
+            dataType: 'json',
+            success: function(data){
+              // console.log(data);
+              theme.cartDrawer(data);
+              $('#CartTemplate').removeClass('is-loading');
+            },
+            error: function(xhr){
+              console.log('error',xhr);
+              $('#CartTemplate').removeClass('is-loading');
+            }
+          });
+  
+      });
+    
+    window.theme = window.theme || {};
+
+    theme.cartDrawer = function(data){
+      
+        $('#CartDrawer').attr('data-fetch', 1);
+        $('#CartTemplate').addClass('is-loading');
+
+        
+        if(typeof data.cart_content  == 'string'){
+          $('#CartTemplate').html(data.cart_content);
+        }
+
+        let cart_item_count = data.item_count || data.cart.item_count;
+
+        if(cart_item_count > 0){
+          $('.cart-count').removeClass('hidden-count');
+        }else{
+          $('.cart-count').addClass('hidden-count');
+        }
+
+        $('.cart-count').text(cart_item_count);
+        $('#CartTemplate').removeClass('is-loading');
+        $(".cart-drawer-content").animate({ scrollTop: 0 });
+
+        if(window.EasyStore != undefined && window.EasyStore.Promotion != undefined && window.EasyStore.Promotion.updateCartPromotion != undefined) window.EasyStore.Promotion.updateCartPromotion()
+
+    }
+  
+    theme.fetchCartDrawer = function(data){
+        $('#CartTemplate').addClass('is-loading');
+        $.ajax({
+          url: '/new_cart?retrieve=true',
+          type: 'GET',
+          success: function(data, status) {
+            // console.log(data);
+            theme.cartDrawer(data);
+  
+            $('#CartTemplate').removeClass('is-loading');
+          },
+          error: function(XMLHttpRequest, textStatus) {
+            console.log('error',XMLHttpRequest,textStatus);
+            $('#CartTemplate').removeClass('is-loading');
+          }
+        });
+    }
+  
+    theme.updateCartDrawer = function(data){
+      $('#CartTemplate').addClass('is-loading');
+  
+      $.ajax({
+        url: '/new_cart/update',
+        type: 'PUT',
+        dataType: 'json',
+        data: $('#CartForm').serialize(),
+        success: function(data, status) {
+          theme.cartDrawer(data);
+        },
+        error: function(XMLHttpRequest, textStatus) {
+          console.log('error',XMLHttpRequest,textStatus);
+        }
+      });
+    }
+  
+    function debounce(func, wait, immediate) {
+      var timeout;
+      return function() {
+          var context = this, args = arguments;
+          var later = function() {
+              timeout = null;
+              if (!immediate) func.apply(context, args);
+          };
+          var callNow = immediate && !timeout;
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+          if (callNow) func.apply(context, args);
+      };
+    };
+  
+    $('body').on("change", 'input.cart__quantity-selector', function (){
+      theme.updateCartDrawer();
+    });
+  
+  
+    $('#updateCartDrawer').click(function() {
+      theme.updateCartDrawer();
+    });
+  
+    $('body').on("click", ".btn-qty-adjust", function() {
+  
+      var $button = $(this);
+      var oldValue = $button.parent().find("input.cart__quantity-selector").val();
+  
+      if ($button.attr('data-adjust') == 1) {
+        var newVal = parseFloat(oldValue) + 1;
+      } else {
+      // Don't allow decrementing below zero
+        if (oldValue > 0) {
+          var newVal = parseFloat(oldValue) - 1;
+        } else {
+          newVal = 0;
+        }
+      }
+  
+      $button.parent().find("input").val(newVal);
+    });
+      
+    $('body').on("click", ".btn-qty-adjust", debounce(function() {
+      theme.updateCartDrawer();
+    },350));
+  
+    $('button.checkout').click(function() {
+      $(this).addClass('btn--loading');
+    });
+  
+    var add_cart_success_html = '<svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve"> <g> <g> <path d="M383.841,171.838c-7.881-8.31-21.02-8.676-29.343-0.775L221.987,296.732l-63.204-64.893 c-8.005-8.213-21.13-8.393-29.35-0.387c-8.213,7.998-8.386,21.137-0.388,29.35l77.492,79.561 c4.061,4.172,9.458,6.275,14.869,6.275c5.134,0,10.268-1.896,14.288-5.694l147.373-139.762 C391.383,193.294,391.735,180.155,383.841,171.838z"/> </g> </g> <g> <g> <path d="M256,0C114.84,0,0,114.84,0,256s114.84,256,256,256s256-114.84,256-256S397.16,0,256,0z M256,470.487 c-118.265,0-214.487-96.214-214.487-214.487c0-118.265,96.221-214.487,214.487-214.487c118.272,0,214.487,96.221,214.487,214.487 C470.487,374.272,374.272,470.487,256,470.487z"/> </g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> </svg>';
+        add_cart_success_html += '{{ "products.product.added_to_cart" | t }} <br><a class="CartDrawerTrigger">{{ "products.product.view_cart" | t }}</a>';
+  
+    function popToast(content) {
+      var x = document.getElementById("toast"),
+          y = document.getElementById("toastContent");
+  
+      y.innerHTML = content;
+      x.className += " show";
+      
+      var hideToast = setTimeout(function(){ x.className = x.className.replace(" show", ""); }, 3000);
+    }
+  
+  
+  </script>
+
+  
+  <vouchers-modal>
+    <div class="vouchers-modal-wrapper page-width">
+      <div id="vouchers-modal" class="vouchers-modal focus-inset" aria-modal="true" role="dialog" tabindex="-1">
+        <div class="vouchers-modal__header">
+          <div class="vouchers-modal__heading">{{ 'checkout.general.vouchers' | t }}</div>
+          <button type="button" class="vouchers-modal__close modal__close-button link link--text focus-inset" aria-label="{{ 'accessibility.close' | t }}">
+            <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" role="presentation" class="icon icon-close " fill="none" viewBox="0 0 18 17">
+              <path d="M.865 15.978a.5.5 0 00.707.707l7.433-7.431 7.579 7.282a.501.501 0 00.846-.37.5.5 0 00-.153-.351L9.712 8.546l7.417-7.416a.5.5 0 10-.707-.708L8.991 7.853 1.413.573a.5.5 0 10-.693.72l7.563 7.268-7.418 7.417z" fill="currentColor">
+              </path>
+            </svg>
+          </button>
+        </div>
+
+        <discount-input>
+          <div class="field">
+            <input type="text" id="input-discount_code" class="search__input field__input" name="voucher_code" placeholder="{{ 'checkout.general.discount_code' | t }}">
+            <button type="button" name="apply" class="btn btn--secondary button button--secondary">{{ 'checkout.general.apply' | t }}</button>
+          </div>
+          <div class="form__message hidden" tabindex="-1" autofocus>
+            <svg aria-hidden="true" focusable="false" role="presentation" class="icon icon-error " viewBox="0 0 13 13">
+              <circle cx="6.5" cy="6.50049" r="5.5" stroke="white" stroke-width="2"></circle>
+              <circle cx="6.5" cy="6.5" r="5.5" fill="#EB001B" stroke="#EB001B" stroke-width="0.7"></circle>
+              <path d="M5.87413 3.52832L5.97439 7.57216H7.02713L7.12739 3.52832H5.87413ZM6.50076 9.66091C6.88091 9.66091 7.18169 9.37267 7.18169 9.00504C7.18169 8.63742 6.88091 8.34917 6.50076 8.34917C6.12061 8.34917 5.81982 8.63742 5.81982 9.00504C5.81982 9.37267 6.12061 9.66091 6.50076 9.66091Z" fill="white"></path>
+              <path d="M5.87413 3.17832H5.51535L5.52424 3.537L5.6245 7.58083L5.63296 7.92216H5.97439H7.02713H7.36856L7.37702 7.58083L7.47728 3.537L7.48617 3.17832H7.12739H5.87413ZM6.50076 10.0109C7.06121 10.0109 7.5317 9.57872 7.5317 9.00504C7.5317 8.43137 7.06121 7.99918 6.50076 7.99918C5.94031 7.99918 5.46982 8.43137 5.46982 9.00504C5.46982 9.57872 5.94031 10.0109 6.50076 10.0109Z" fill="white" stroke="#EB001B" stroke-width="0.7"></path>
+            </svg>
+            <div class="js-error-content"></div>
+          </div>
+        </discount-input>
+        <br>
+
+        
+        {% if cart.available_discount_codes.size > 0 %}
+        <div>{{ 'checkout.general.available_vouchers' | t }}</div>
+        <vouchers-list>
+          <div class="vouchers-list-wrapper">
+            {% for discount_code in cart.available_discount_codes %}
+              <input type="radio" name="voucher_code" id="voucher-{{ discount_code.id }}" value="{{ discount_code.discount_codes | first }}" {% if discount_code.is_enabled == false %} disabled {% endif %}>
+              <label for="voucher-{{ discount_code.id }}" class="voucher-option__item {% if discount_code.is_enabled == false %} voucher-disabled {% endif %}">
+                <div>
+                  <span class="voucher-option_radio"></span>
+                  <div>
+                    {{ discount_code.title }}
+                    {% if discount_code.is_enabled == false %}
+                      <div class="form__message">
+                        <svg class="icon icon-error" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,3a9.25,9.25,0,1,0,9.25,9.25A9.26,9.26,0,0,0,12,3Zm0,17a7.75,7.75,0,1,1,7.75-7.75A7.76,7.76,0,0,1,12,20Z"/><path d="M12,7.29a1,1,0,1,0,1,1A1,1,0,0,0,12,7.29Z"/><path d="M12,11a.9.9,0,0,0-.9.9v4.67a.9.9,0,1,0,1.8,0V11.85A.9.9,0,0,0,12,11Z"/></svg>
+                        {{ "error.checkout.voucher_condition_not_matched" | t}}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </label>
+            {% endfor %}
+          </div>
+          <div class="vouchers-modal__buttons">
+            <button class="btn btn--full button button--primary button--full-width" name="apply">{{ 'checkout.general.apply' | t }}</button>
+          </div>
+          <div class="form__message hidden" tabindex="-1" autofocus>
+            <svg aria-hidden="true" focusable="false" role="presentation" class="icon icon-error " viewBox="0 0 13 13">
+              <circle cx="6.5" cy="6.50049" r="5.5" stroke="white" stroke-width="2"></circle>
+              <circle cx="6.5" cy="6.5" r="5.5" fill="#EB001B" stroke="#EB001B" stroke-width="0.7"></circle>
+              <path d="M5.87413 3.52832L5.97439 7.57216H7.02713L7.12739 3.52832H5.87413ZM6.50076 9.66091C6.88091 9.66091 7.18169 9.37267 7.18169 9.00504C7.18169 8.63742 6.88091 8.34917 6.50076 8.34917C6.12061 8.34917 5.81982 8.63742 5.81982 9.00504C5.81982 9.37267 6.12061 9.66091 6.50076 9.66091Z" fill="white"></path>
+              <path d="M5.87413 3.17832H5.51535L5.52424 3.537L5.6245 7.58083L5.63296 7.92216H5.97439H7.02713H7.36856L7.37702 7.58083L7.47728 3.537L7.48617 3.17832H7.12739H5.87413ZM6.50076 10.0109C7.06121 10.0109 7.5317 9.57872 7.5317 9.00504C7.5317 8.43137 7.06121 7.99918 6.50076 7.99918C5.94031 7.99918 5.46982 8.43137 5.46982 9.00504C5.46982 9.57872 5.94031 10.0109 6.50076 10.0109Z" fill="white" stroke="#EB001B" stroke-width="0.7"></path>
+            </svg>
+            <div class="js-error-content"></div>
+          </div>
+        </vouchers-list>
+        {% else %}
+          <div class="empty-vouchers_placeholder">{{ 'checkout.general.empty_vouchers' | t }}</div>
+        {% endif %}
+
+      </div>
+    </div>
+    <div id="vouchers-modal-backdrop" class="vouchers-modal__close"></div>
+  </vouchers-modal>
+
+{% else %}
+  {% comment %}
+    The cart is empty
+  {% endcomment %}
+  <h2>{{ 'cart.general.title' | t }}</h2>
+  <p>{{ 'cart.general.empty' | t }}</p>
+  <p>{{ 'cart.general.continue_browsing_html' | t }}</p>
+{% endif %}
+
+
